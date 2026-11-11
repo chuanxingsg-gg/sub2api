@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 	"github.com/redis/go-redis/v9"
 	"time"
@@ -19,22 +18,8 @@ func ProvideDurableRefreshTokenCache(rdb *redis.Client, db *sql.DB) service.Refr
 	return &durableRefreshTokenCache{RefreshTokenCache: NewRefreshTokenCache(rdb), db: db, rdb: rdb}
 }
 
-// Atomically consume a refresh credential so parallel refresh requests cannot
-// both exchange the same bearer secret for new credentials.
-func (c *durableRefreshTokenCache) ConsumeRefreshToken(ctx context.Context, hash string) (*service.RefreshTokenData, error) {
-	value, err := c.rdb.GetDel(ctx, refreshTokenKey(hash)).Result()
-	if err == redis.Nil {
-		return nil, service.ErrRefreshTokenNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	var data service.RefreshTokenData
-	if err = json.Unmarshal([]byte(value), &data); err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
+// ConsumeRefreshToken 使用内嵌缓存的原子 Lua 实现（v0.2.21 上游修复），
+// 并发刷新时只有一个请求能兑换同一个 refresh token。
 
 func (c *durableRefreshTokenCache) CreateAuthSession(ctx context.Context, id string, userID int64, expires time.Time) error {
 	_, err := c.db.ExecContext(ctx, `INSERT INTO newflow_auth_sessions(session_id,user_id,expires_at) VALUES($1,$2,$3)`, id, userID, expires)

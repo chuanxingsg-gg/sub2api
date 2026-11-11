@@ -30,12 +30,17 @@ type SeatVerifyHandler struct {
 }
 
 func NewSeatVerifyHandler(users *UserHandler, subscriptions *SubscriptionHandler, accounts *AccountHandler) *SeatVerifyHandler {
-	return &SeatVerifyHandler{
-		users:         users.adminService,
-		subscriptions: subscriptions.subscriptionService,
-		usage:         accounts.accountUsageService,
-		client:        &http.Client{Timeout: 70 * time.Second},
+	h := &SeatVerifyHandler{client: &http.Client{Timeout: 70 * time.Second}}
+	if users != nil {
+		h.users = users.adminService
 	}
+	if subscriptions != nil {
+		h.subscriptions = subscriptions.subscriptionService
+	}
+	if accounts != nil {
+		h.usage = accounts.accountUsageService
+	}
+	return h
 }
 
 // Cheapest first. Only models with a configured price are offered.
@@ -57,7 +62,9 @@ type seatKeyView struct {
 // evaluateSeatStructure is the pure, side-effect free part of the check.
 func evaluateSeatStructure(sub *service.UserSubscription, group *service.Group, accounts []service.Account, keys []seatKeyView, now time.Time) []seatCheck {
 	checks := []seatCheck{}
-	add := func(key, label string, ok bool, detail string) { checks = append(checks, seatCheck{key, label, ok, detail}) }
+	add := func(key, label string, ok bool, detail string) {
+		checks = append(checks, seatCheck{key, label, ok, detail})
+	}
 
 	switch {
 	case sub == nil:

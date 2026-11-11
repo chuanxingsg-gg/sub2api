@@ -510,7 +510,8 @@ func TestPrepareAdminCredentialsTrimsProvidedEmail(t *testing.T) {
 func TestPrepareAdminCredentialsAcceptsBcryptMaxLengthPassword(t *testing.T) {
 	t.Parallel()
 
-	admin := AdminConfig{Email: "owner@example.com", Password: strings.Repeat("a", 72)}
+	// new-flow 密码策略拒绝重复字符，这里使用非重复的 72 字节密码。
+	admin := AdminConfig{Email: "owner@example.com", Password: strings.Repeat("Nf7#qL2x", 9)}
 	if _, _, err := prepareAdminCredentials(&admin); err != nil {
 		t.Fatalf("prepareAdminCredentials() error = %v", err)
 	}

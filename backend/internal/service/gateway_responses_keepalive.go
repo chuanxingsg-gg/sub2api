@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -73,4 +74,20 @@ func (s *GatewayService) doResponsesUpstreamWithKeepalive(c *gin.Context, stream
 			}
 		}
 	}
+}
+
+// errAnthropicNativeKeepaliveTick 表示等待上游数据期间保活计时到期；泵状态不变。
+var errAnthropicNativeKeepaliveTick = errors.New("keepalive tick")
+
+// enableKeepalive 让兼容流在等待上游期间按 interval 调用 write 写出保活帧。
+// interval<=0 时不启用并返回 nil；否则返回停止计时器的函数。写失败按客户端断开处理，
+// 此后继续读取上游以完成计费。
+func (st *anthropicCompatStream) enableKeepalive(interval time.Duration, write func() error) func() {
+	ticker, ticks := responsesKeepaliveTicker(interval)
+	if ticker == nil || write == nil {
+		return nil
+	}
+	st.keepaliveTicks = ticks
+	st.keepalive = write
+	return ticker.Stop
 }
