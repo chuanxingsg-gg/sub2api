@@ -269,6 +269,15 @@ func (s *RedeemService) CreateCode(ctx context.Context, code *RedeemCode) error 
 	if code.IsExpired() {
 		return ErrRedeemCodeExpired
 	}
+	if code.Type == RedeemTypeSubscription && code.GroupID != nil {
+		g, err := s.redeemGroup(ctx, *code.GroupID)
+		if err != nil {
+			return err
+		}
+		if err := ValidateRedeemSubscriptionGroup(g); err != nil {
+			return err
+		}
+	}
 
 	if err := s.redeemRepo.Create(ctx, code); err != nil {
 		return fmt.Errorf("create redeem code: %w", err)
@@ -467,6 +476,23 @@ func (s *RedeemService) redeem(ctx context.Context, userID int64, code string, r
 		return nil, fmt.Errorf("get user: %w", err)
 	}
 
+	// 订阅码：确定实际分组；独享 Pro 需要在整个事务（含提交）期间持有席位分配锁
+	var redeemGroup *Group
+	if redeemCode.Type == RedeemTypeSubscription {
+		redeemGroup, err = s.redeemGroup(ctx, *redeemCode.GroupID)
+		if err != nil {
+			return nil, err
+		}
+		if redeemGroup != nil && IsProNativeTemplateGroup(redeemGroup) {
+			ProNativeSeatAllocationMu.Lock()
+			defer ProNativeSeatAllocationMu.Unlock()
+		}
+	}
+	targetGroupID := int64(0)
+	if redeemCode.GroupID != nil {
+		targetGroupID = *redeemCode.GroupID
+	}
+
 	// 使用数据库事务保证兑换码标记与权益发放的原子性
 	tx, err := s.entClient.Tx(ctx)
 	if err != nil {
@@ -516,9 +542,18 @@ func (s *RedeemService) redeem(ctx context.Context, userID int64, code string, r
 
 	case RedeemTypeSubscription:
 		validityDays := redeemCode.ValidityDays
+		minConcurrency := 0
+		if redeemGroup != nil {
+			target, err := s.resolveSubscriptionRedeemTarget(txCtx, userID, redeemGroup, validityDays)
+			if err != nil {
+				return nil, err
+			}
+			targetGroupID = target.GroupID
+			minConcurrency = target.Concurrency
+		}
 		if validityDays < 0 {
 			// 负数天数：缩短订阅，减到 0 则取消订阅
-			if err := s.reduceOrCancelSubscription(txCtx, userID, *redeemCode.GroupID, -validityDays, redeemCode.Code); err != nil {
+			if err := s.reduceOrCancelSubscription(txCtx, userID, targetGroupID, -validityDays, redeemCode.Code); err != nil {
 				return nil, fmt.Errorf("reduce or cancel subscription: %w", err)
 			}
 		} else {
@@ -527,13 +562,16 @@ func (s *RedeemService) redeem(ctx context.Context, userID int64, code string, r
 			}
 			_, _, err := s.subscriptionService.AssignOrExtendSubscription(txCtx, &AssignSubscriptionInput{
 				UserID:       userID,
-				GroupID:      *redeemCode.GroupID,
+				GroupID:      targetGroupID,
 				ValidityDays: validityDays,
 				AssignedBy:   0, // 系统分配
 				Notes:        fmt.Sprintf("通过兑换码 %s 兑换", redeemCode.Code),
 			})
 			if err != nil {
 				return nil, fmt.Errorf("assign or extend subscription: %w", err)
+			}
+			if err := s.ensureRedeemConcurrency(txCtx, userID, minConcurrency); err != nil {
+				return nil, fmt.Errorf("update user concurrency: %w", err)
 			}
 		}
 
@@ -547,7 +585,7 @@ func (s *RedeemService) redeem(ctx context.Context, userID int64, code string, r
 	}
 
 	// 事务提交成功后失效缓存
-	s.invalidateRedeemCaches(ctx, userID, redeemCode)
+	s.invalidateRedeemCaches(ctx, userID, redeemCode, targetGroupID)
 
 	// 余额类正数兑换码触发邀请返利（best-effort，失败不影响兑换结果）
 	if redeemCode.Type == RedeemTypeBalance && redeemCode.Value > 0 {
@@ -564,7 +602,7 @@ func (s *RedeemService) redeem(ctx context.Context, userID int64, code string, r
 }
 
 // invalidateRedeemCaches 失效兑换相关的缓存
-func (s *RedeemService) invalidateRedeemCaches(ctx context.Context, userID int64, redeemCode *RedeemCode) {
+func (s *RedeemService) invalidateRedeemCaches(ctx context.Context, userID int64, redeemCode *RedeemCode, targetGroupID int64) {
 	switch redeemCode.Type {
 	case RedeemTypeBalance:
 		if s.authCacheInvalidator != nil {
@@ -592,8 +630,8 @@ func (s *RedeemService) invalidateRedeemCaches(ctx context.Context, userID int64
 		if s.billingCacheService == nil {
 			return
 		}
-		if redeemCode.GroupID != nil {
-			groupID := *redeemCode.GroupID
+		if targetGroupID > 0 {
+			groupID := targetGroupID
 			go func() {
 				cacheCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 				defer cancel()

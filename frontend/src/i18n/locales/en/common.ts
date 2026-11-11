@@ -244,7 +244,7 @@ export default {
     emailRequired: 'Email is required',
     invalidEmail: 'Please enter a valid email address',
     passwordRequired: 'Password is required',
-    passwordMinLength: 'Password must be at least 6 characters',
+    passwordMinLength: 'New passwords must contain at least 15 characters and at most 72 UTF-8 bytes',
     loginFailed: 'Login failed. Please check your credentials and try again.',
     errors: {
       USER_NOT_ACTIVE: 'Account has been disabled.',

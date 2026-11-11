@@ -1,6 +1,7 @@
 <template>
   <AppLayout>
     <div class="mx-auto max-w-6xl space-y-6">
+      <HomeModelCardsSettings />
       <!-- Loading State -->
       <div v-if="loading" class="flex items-center justify-center py-12">
         <div
@@ -8975,6 +8976,7 @@
 </template>
 
 <script setup lang="ts">
+import HomeModelCardsSettings from "@/components/admin/HomeModelCardsSettings.vue";
 import { ref, reactive, computed, onMounted, watch } from "vue";
 import { listPlatformIds } from "@/constants/platformCatalog";
 import { useI18n } from "vue-i18n";

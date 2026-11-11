@@ -3,6 +3,7 @@
  * Handles AI platform account management for administrators
  */
 
+import { shouldAutoProNativeSeat } from '@/composables/useAutoProNativeSeat'
 import { apiClient } from '../client'
 import type { OpenAIReferralRefreshResult, OpenAIReferralSendResult } from '@/types/openaiReferrals'
 import type {
@@ -184,7 +185,10 @@ export async function getById(id: number): Promise<Account> {
  * @returns Created account
  */
 export async function create(accountData: CreateAccountRequest): Promise<Account> {
-  const { data } = await apiClient.post<Account>('/admin/accounts', accountData)
+  const payload: CreateAccountRequest = shouldAutoProNativeSeat(accountData.platform, accountData.type)
+    ? { ...accountData, auto_pronative_seat: true }
+    : accountData
+  const { data } = await apiClient.post<Account>('/admin/accounts', payload)
   return data
 }
 

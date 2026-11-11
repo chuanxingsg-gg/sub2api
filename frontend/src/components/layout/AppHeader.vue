@@ -362,8 +362,8 @@ async function handleLogout() {
   try {
     await authStore.logout()
   } catch (error) {
-    // Ignore logout errors - still redirect to login
-    console.error('Logout error:', error)
+    appStore.showError('退出未完成，服务器尚未确认撤销会话，请稍后重试。')
+    return
   }
   await router.push('/login')
 }

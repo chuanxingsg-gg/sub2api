@@ -60,6 +60,10 @@ func jwtAuth(
 		// 验证token
 		claims, err := authService.ValidateToken(tokenString)
 		if err != nil {
+			if errors.Is(err, service.ErrServiceUnavailable) {
+				AbortWithError(c, 503, "AUTH_UNAVAILABLE", "Authentication service temporarily unavailable")
+				return
+			}
 			if errors.Is(err, service.ErrTokenExpired) {
 				AbortWithError(c, 401, "TOKEN_EXPIRED", "Token has expired")
 				return

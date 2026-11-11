@@ -47,6 +47,7 @@ type GatewayHandler struct {
 	userService               *service.UserService
 	billingCacheService       *service.BillingCacheService
 	usageService              *service.UsageService
+	accountUsageService       *service.AccountUsageService
 	apiKeyService             *service.APIKeyService
 	usageRecordWorkerPool     *service.UsageRecordWorkerPool
 	errorPassthroughService   *service.ErrorPassthroughService
@@ -1823,6 +1824,11 @@ func (h *GatewayHandler) usageUnrestricted(c *gin.Context, ctx context.Context, 
 			}
 		}
 
+		if h.accountUsageService != nil && service.IsProNativeSeatGroup(apiKey.Group) {
+			if rows, ok := h.accountUsageService.ProNativeSeatQuotaRows(ctx, apiKey.Group.ID); ok {
+				resp["data"] = rows
+			}
+		}
 		if usageData != nil {
 			resp["usage"] = usageData
 		}

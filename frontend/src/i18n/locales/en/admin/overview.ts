@@ -741,6 +741,7 @@ export default {
       createdAt: 'Created',
       totalRecharged: 'Total Recharged',
       roles: {
+      operator: 'Operations administrator',
         admin: 'Admin',
         user: 'User'
       },

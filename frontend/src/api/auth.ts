@@ -204,15 +204,10 @@ export async function getCurrentUser() {
 export async function logout(): Promise<void> {
   const refreshToken = getRefreshToken()
 
-  // Try to revoke the refresh token on the server
-  if (refreshToken) {
-    try {
-      await apiClient.post('/auth/logout', { refresh_token: refreshToken })
-    } catch {
-      // Ignore errors - we still want to clear local state
-    }
+  // Do not report success if the server did not revoke the session.
+  if (refreshToken || getAuthToken()) {
+    await apiClient.post('/auth/logout', { refresh_token: refreshToken || '' })
   }
-
   clearAuthToken()
 }
 

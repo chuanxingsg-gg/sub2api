@@ -1,78 +1,35 @@
 <template>
-  <div class="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
-    <!-- Background -->
-    <div
-      class="absolute inset-0 bg-gradient-to-br from-gray-50 via-primary-50/30 to-gray-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950"
-    ></div>
-
-    <!-- Decorative Elements -->
-    <div class="pointer-events-none absolute inset-0 overflow-hidden">
-      <!-- Gradient Orbs -->
-      <div
-        class="absolute -right-40 -top-40 h-80 w-80 rounded-full bg-primary-400/20 blur-3xl"
-      ></div>
-      <div
-        class="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-primary-500/15 blur-3xl"
-      ></div>
-      <div
-        class="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-300/10 blur-3xl"
-      ></div>
-
-      <!-- Grid Pattern -->
-      <div
-        class="absolute inset-0 bg-[linear-gradient(rgba(20,184,166,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(20,184,166,0.03)_1px,transparent_1px)] bg-[size:64px_64px]"
-      ></div>
-    </div>
-
-    <!-- Content Container -->
-    <div class="relative z-10 w-full max-w-md">
-      <!-- Logo/Brand -->
-      <div class="mb-8 text-center">
-        <!-- Custom Logo or Default Logo -->
-        <template v-if="settingsLoaded">
-          <div
-            class="mb-4 inline-flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl shadow-lg shadow-primary-500/30"
-          >
-            <img :src="siteLogo || '/logo.svg'" alt="Logo" class="h-full w-full object-contain" />
-          </div>
-          <h1 class="text-gradient mb-2 text-3xl font-bold">
-            {{ siteName }}
-          </h1>
-          <p class="text-sm text-gray-500 dark:text-dark-400">
-            {{ siteSubtitle }}
-          </p>
-        </template>
-      </div>
-
-      <!-- Card Container -->
-      <div class="card-glass rounded-2xl p-8 shadow-glass">
+  <div class="flow-auth">
+    <div class="flow-auth-sky" aria-hidden="true"><div class="flow-auth-clouds"></div><img src="/flow-energy.svg" alt=""/></div>
+    <header class="flow-auth-header">
+      <router-link to="/home" class="flow-brand"><img src="/flow-mark.svg" alt=""/><span>{{ siteName }}<small>ALL MODELS. ONE FLOW.</small></span></router-link>
+      <router-link to="/home" class="btn btn-secondary">返回官网 ↗</router-link>
+    </header>
+    <main class="flow-auth-body">
+      <section class="flow-auth-vision" aria-label="品牌愿景">
+        <div class="flow-eyebrow">AI · 全模型服务平台</div>
+        <h1>掌控每一股流量<br/><span class="flow-gradient">奔赴下一个未来</span></h1>
+        <p>连接全球模型生态，让每一次创造持续生长。</p>
+        <div class="flow-ecosystem">GPT / Claude / Gemini / DeepSeek / Qwen / 更多模型</div>
+      </section>
+      <section class="flow-auth-panel">
+        <div class="flow-eyebrow">NEW FLOW · ACCOUNT ACCESS</div>
         <slot />
-      </div>
-
-      <!-- Footer Links -->
-      <div class="mt-6 text-center text-sm">
-        <slot name="footer" />
-      </div>
-
-      <!-- Copyright -->
-      <div class="mt-8 text-center text-xs text-gray-400 dark:text-dark-500">
-        &copy; {{ currentYear }} {{ siteName }}. All rights reserved.
-      </div>
-    </div>
+        <div class="mt-6 text-center text-sm"><slot name="footer" /></div>
+      </section>
+    </main>
+    <footer>© {{ currentYear }} {{ siteName }} · ALL MODELS. ONE FLOW.</footer>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores'
-import { sanitizeUrl } from '@/utils/url'
+
 
 const appStore = useAppStore()
 
-const siteName = computed(() => appStore.siteName || 'Sub2API')
-const siteLogo = computed(() => sanitizeUrl(appStore.siteLogo || '', { allowRelative: true, allowDataUrl: true }))
-const siteSubtitle = computed(() => appStore.cachedPublicSettings?.site_subtitle || 'Subscription to API Conversion Platform')
-const settingsLoaded = computed(() => appStore.publicSettingsLoaded)
+const siteName = computed(() => appStore.siteName || '新流量时代')
 
 const currentYear = computed(() => new Date().getFullYear())
 
@@ -81,8 +38,3 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.text-gradient {
-  @apply bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent;
-}
-</style>

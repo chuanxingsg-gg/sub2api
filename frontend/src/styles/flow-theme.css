@@ -1,0 +1,100 @@
+/* New Flow · Dawn: shared visual system across public, account and administration routes. */
+:root{--flow-gold:#c9772f;--flow-apricot:#e0794f;--flow-rose:#d4556b;--flow-line:#dfe2f4;--flow-panel:#fff;--flow-muted:#5c639e;
+  --flow-sunrise:linear-gradient(100deg,#ffd58a 0%,#ffb27a 45%,#ff7d93 100%)}
+.dark{--flow-gold:#ffd58a;--flow-apricot:#ffb27a;--flow-rose:#ff7a8a;--flow-line:rgba(255,255,255,.12);--flow-panel:rgba(255,255,255,.06);--flow-muted:#b4b9e0}
+body{font-family:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;letter-spacing:.01em}
+.dark body{color:#f6f4ff;background:
+  radial-gradient(ellipse 60% 40% at 100% 100%,rgba(255,150,120,.14),transparent 70%),
+  radial-gradient(ellipse 50% 35% at 0 0,rgba(120,140,255,.10),transparent 70%),
+  linear-gradient(180deg,#0a1140,#0f1750 60%,#141a52);background-attachment:fixed}
+::selection{background:#ffb27a55;color:inherit}
+:focus-visible{outline:2px solid var(--flow-gold);outline-offset:3px}
+.dark .bg-mesh-gradient{background:radial-gradient(ellipse at 100% 100%,rgba(255,150,120,.10),transparent 55%),radial-gradient(ellipse at 0 0,rgba(120,140,255,.08),transparent 50%)}
+
+/* Surfaces: frosted night glass */
+.card,.stat-card,.card-glass,.glass-card{border-radius:16px;border-color:var(--flow-line);box-shadow:0 6px 28px rgba(16,23,77,.08)}
+.dark :is(.card,.stat-card,.card-glass,.glass-card){background:rgba(255,255,255,.055);backdrop-filter:blur(16px);border-color:rgba(255,255,255,.12);box-shadow:0 18px 50px rgba(5,8,40,.28)}
+.dark .card-header{border-color:var(--flow-line)}
+.dark .glass{background:rgba(14,20,72,.82);backdrop-filter:blur(18px);border-color:rgba(255,255,255,.14)}
+
+/* Buttons and inputs */
+.btn{border-radius:999px;min-height:42px;font-weight:600;letter-spacing:.02em}
+.btn-primary{background:#10174d;color:#fff;border:1px solid #10174d;box-shadow:0 6px 20px rgba(16,23,77,.18)}
+.btn-primary:hover:not(:disabled){background:#19205e}
+.dark .btn-primary{background:#fff;color:#14194a;border-color:#fff;box-shadow:0 8px 28px rgba(255,190,150,.25)}
+.dark .btn-primary:hover:not(:disabled){background:#fff7ee;box-shadow:0 10px 34px rgba(255,190,150,.4)}
+.btn-secondary{border-color:var(--flow-line)}
+.dark .btn-secondary{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.22)}
+.btn-secondary:hover:not(:disabled){border-color:var(--flow-apricot)}
+.input,select,textarea{border-radius:12px}
+.dark .input{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.18);color:#fff}
+.input:focus{border-color:var(--flow-gold);box-shadow:0 0 0 3px rgba(255,213,138,.18)}
+.input-error{border-color:#f87171!important}
+.dark input::placeholder,.dark textarea::placeholder{color:#8f95c4}
+.dark .text-gray-500,.dark .text-dark-500{color:#a3a9d6}
+.dark .text-gray-400,.dark .text-dark-400{color:#b9bde2}
+
+/* Sidebar */
+.sidebar{border-right:1px solid var(--flow-line)}
+.dark .sidebar{background:rgba(10,15,58,.72);backdrop-filter:blur(18px)}
+.sidebar-header{border-bottom:1px solid var(--flow-line)}
+.sidebar-logo{box-shadow:0 6px 20px rgba(120,110,255,.25)!important;border-radius:9px!important;background:transparent!important}
+.sidebar-link{border:1px solid transparent;border-radius:12px;min-height:43px}
+.sidebar-link-active{background:rgba(16,23,77,.06)!important;border-color:rgba(16,23,77,.1)!important;color:#10174d!important;box-shadow:inset 3px 0 var(--flow-apricot)}
+.dark .sidebar-link-active{background:rgba(255,255,255,.1)!important;border-color:rgba(255,255,255,.16)!important;color:#fff!important}
+.sidebar-link:hover{border-color:rgba(255,178,122,.3)}
+
+/* Tables */
+.dark thead{background:rgba(255,255,255,.05);color:#c3c7ea}
+.dark tbody tr:hover{background:rgba(255,255,255,.035)}
+.dark :is(table th,table td){border-color:rgba(255,255,255,.09)}
+
+/* Page banner */
+.flow-banner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding:22px 26px;border:1px solid var(--flow-line);border-radius:20px;overflow:hidden;
+  background:radial-gradient(ellipse 60% 140% at 85% 130%,rgba(255,170,120,.35),transparent 60%),linear-gradient(120deg,rgba(16,23,77,.04),transparent)}
+.dark .flow-banner{background:radial-gradient(ellipse 55% 160% at 85% 140%,rgba(255,160,120,.38),rgba(255,120,140,.12) 45%,transparent 70%),linear-gradient(120deg,rgba(255,255,255,.06),rgba(255,255,255,.02))}
+.flow-banner:after{content:"";position:absolute;right:6%;bottom:-40px;width:260px;height:120px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,240,210,.55),transparent);filter:blur(6px);pointer-events:none}
+.flow-eyebrow{color:var(--flow-apricot);font:600 11px/1.6 ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px}
+.flow-banner h2{font-size:clamp(22px,2.4vw,34px);font-weight:800;letter-spacing:-.03em}
+.flow-banner p:last-child{color:var(--flow-muted);margin-top:6px;font-size:13px}
+.flow-gradient{background:var(--flow-sunrise);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* Sign-in / registration: full-bleed dawn sky */
+.flow-auth{min-height:100vh;position:relative;overflow:hidden;color:#fff;background:#0a1140}
+.flow-auth-sky{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 30% 8% at 28% 80%,rgba(255,246,222,.95),rgba(255,214,150,.55) 40%,transparent 75%),
+   radial-gradient(ellipse 80% 22% at 30% 82%,rgba(255,170,120,.7),rgba(255,120,140,.3) 45%,transparent 78%),
+   linear-gradient(180deg,#0a1140 0%,#121b5a 28%,#253080 48%,#5a4e9e 62%,#b6719e 71%,#f39a86 79%,#c77a8e 86%,#3a3274 100%)}
+.flow-auth-sky img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:28% 100%;transform:translateX(-22%)}
+.flow-auth-clouds{position:absolute;left:-5%;right:-5%;bottom:-3%;height:28%;background:url(/dawn-clouds.svg) center/100% 100% no-repeat;opacity:.5;mix-blend-mode:screen}
+.flow-auth-header,.flow-auth-body,.flow-auth footer{position:relative;z-index:1}
+.flow-auth-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 5%}
+.flow-auth-header .btn-secondary{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.35);backdrop-filter:blur(10px)}
+.flow-brand{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:800;color:#fff}
+.flow-brand img{width:48px;height:48px;border-radius:11px;box-shadow:0 6px 26px rgba(120,110,255,.28),0 2px 10px rgba(255,170,130,.25)}.flow-brand small{display:block;font-size:9px;letter-spacing:.24em;font-weight:500;color:rgba(255,255,255,.7)}
+.flow-auth-body{max-width:1440px;margin:auto;padding:5vh 5% 60px;min-height:calc(100vh - 160px);display:grid;grid-template-columns:1.15fr 1fr;align-items:center;gap:7%}
+.flow-auth-vision{align-self:center;padding-bottom:16vh}
+.flow-auth-vision .flow-eyebrow{display:inline-block;color:#fff;padding:7px 16px;border:1px solid rgba(255,255,255,.3);border-radius:999px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);font-family:inherit;letter-spacing:.12em}
+.flow-auth-vision h1{font-weight:800;font-size:clamp(34px,3.8vw,60px);line-height:1.25;letter-spacing:-.02em;margin-top:18px;color:#fff;text-shadow:0 4px 30px rgba(10,17,64,.35)}
+.flow-auth-vision h1 .flow-gradient{text-shadow:none}
+.flow-auth-vision p{color:rgba(255,255,255,.85);margin-top:16px;line-height:1.8}
+.flow-ecosystem{font-size:12px;letter-spacing:.08em;line-height:2;color:rgba(255,255,255,.7);margin-top:14px}
+.flow-auth-panel{min-width:0;color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:24px;padding:36px;
+  background:linear-gradient(160deg,rgba(32,40,110,.62),rgba(14,20,70,.7));backdrop-filter:blur(22px);
+  box-shadow:0 30px 90px rgba(0,0,20,.45),inset 0 -40px 60px -40px rgba(255,170,130,.35)}
+.flow-auth-panel .flow-eyebrow{color:#ffd58a}
+.flow-auth-panel :is(h1,h2,h3,label){color:#fff}
+.flow-auth-panel :is(p,.text-gray-500,.text-gray-600,.text-dark-400,.text-dark-500){color:#c3c7ea}
+.flow-auth-panel .input{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);color:#fff}
+.flow-auth-panel .btn-primary{background:#fff;color:#14194a;border-color:#fff}
+.flow-auth-panel a{color:#ffd58a}
+.flow-auth-panel .text-center{text-align:left}.flow-auth-panel .text-center.mt-6{text-align:center}
+.flow-auth footer{padding:20px 5%;font-size:12px;color:rgba(255,255,255,.65)}
+@media(max-width:900px){.flow-auth-body{grid-template-columns:1fr;max-width:600px;padding:32px 20px}.flow-auth-vision{display:none}.flow-brand{font-size:18px}.flow-auth-panel{padding:24px}.flow-banner{padding:18px}.flow-banner .btn{width:100%}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+/* Emphasize numerical scanning without changing business values. */
+.dark .card .text-xl{font-size:1.7rem;line-height:1.25;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.dark .driver-popover{background:#141b55;color:#f6f4ff;border:1px solid rgba(255,255,255,.2)}
+.dark .driver-popover :is(.driver-popover-title,.driver-popover-description){color:#f6f4ff}
+.dark .driver-popover button{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2);text-shadow:none}

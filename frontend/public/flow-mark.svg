@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="78 78 484 484" role="img" aria-label="新流量时代">
+<defs>
+<linearGradient id="bg" x1="90" y1="90" x2="550" y2="550" gradientUnits="userSpaceOnUse"><stop stop-color="#162066"/><stop offset=".45" stop-color="#232a74"/><stop offset=".78" stop-color="#5a3a7c"/><stop offset="1" stop-color="#8a4a7e"/></linearGradient>
+<radialGradient id="warm" cx="560" cy="570" r="300" gradientUnits="userSpaceOnUse"><stop stop-color="#f3a08f" stop-opacity=".95"/><stop offset=".45" stop-color="#c06a86" stop-opacity=".5"/><stop offset="1" stop-color="#7a3f7e" stop-opacity="0"/></radialGradient>
+<radialGradient id="halo" cx="470" cy="320" r="170" gradientUnits="userSpaceOnUse"><stop stop-color="#fff1dc" stop-opacity=".55"/><stop offset=".5" stop-color="#ffb9a0" stop-opacity=".18"/><stop offset="1" stop-color="#ffb9a0" stop-opacity="0"/></radialGradient>
+<linearGradient id="edge" x1="80" y1="80" x2="560" y2="560" gradientUnits="userSpaceOnUse"><stop stop-color="#a7a3dc" stop-opacity=".7"/><stop offset=".6" stop-color="#9c7fb8" stop-opacity=".45"/><stop offset="1" stop-color="#f2b6a2" stop-opacity=".9"/></linearGradient>
+<linearGradient id="top" x1="173" y1="206" x2="400" y2="320" gradientUnits="userSpaceOnUse"><stop stop-color="#8fb2ff"/><stop offset=".55" stop-color="#e9a59a"/><stop offset="1" stop-color="#ffb27a"/></linearGradient>
+<linearGradient id="bot" x1="173" y1="433" x2="400" y2="320" gradientUnits="userSpaceOnUse"><stop stop-color="#ff6e88"/><stop offset=".55" stop-color="#ff8f84"/><stop offset="1" stop-color="#ffb27a"/></linearGradient>
+<linearGradient id="mid" x1="157" y1="320" x2="470" y2="320" gradientUnits="userSpaceOnUse"><stop stop-color="#b8a6ff"/><stop offset=".45" stop-color="#ffbe86"/><stop offset=".8" stop-color="#ffe9cf"/><stop offset="1" stop-color="#fffaf0"/></linearGradient>
+<filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>
+<filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+<clipPath id="tile"><rect x="80" y="80" width="480" height="480" rx="108"/></clipPath>
+</defs>
+<g clip-path="url(#tile)">
+<rect x="80" y="80" width="480" height="480" fill="url(#bg)"/>
+<rect x="80" y="80" width="480" height="480" fill="url(#warm)"/>
+<rect x="80" y="80" width="480" height="480" fill="url(#halo)"/>
+<path d="M132 458 Q320 395 508 458" fill="none" stroke="#c9b8e8" stroke-opacity=".35" stroke-width="2.5"/>
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+<g filter="url(#glow)" opacity=".95" stroke-width="36">
+<path d="M173 206 C262 206 282 302 392 318" stroke="url(#top)"/>
+<path d="M173 433 C262 433 282 338 392 322" stroke="url(#bot)"/>
+<path d="M157 320 H468" stroke="url(#mid)"/>
+<path d="M400 252 L468 320 L400 388" stroke="#fff3dd" stroke-width="34"/>
+</g>
+<path d="M173 206 C262 206 282 302 392 318" stroke="url(#top)" stroke-width="31"/>
+<path d="M173 433 C262 433 282 338 392 322" stroke="url(#bot)" stroke-width="31"/>
+<path d="M157 320 H468" stroke="url(#mid)" stroke-width="31"/>
+<path d="M400 252 L468 320 L400 388" stroke="#fff4e0" stroke-width="33"/>
+</g>
+<circle cx="470" cy="320" r="22" fill="#fffaf0" filter="url(#soft)"/>
+<circle cx="470" cy="320" r="12" fill="#ffffff"/>
+<circle cx="173" cy="206" r="18" fill="#8fb2ff" filter="url(#soft)"/><circle cx="173" cy="206" r="11" fill="#eaf0ff"/>
+<circle cx="157" cy="320" r="18" fill="#b8a6ff" filter="url(#soft)"/><circle cx="157" cy="320" r="11" fill="#f1ecff"/>
+<circle cx="173" cy="433" r="18" fill="#ff6e88" filter="url(#soft)"/><circle cx="173" cy="433" r="11" fill="#ffe4ea"/>
+</g>
+<rect x="81.5" y="81.5" width="477" height="477" rx="107" fill="none" stroke="url(#edge)" stroke-width="3"/>
+</svg>

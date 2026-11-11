@@ -1,5 +1,6 @@
 <template>
   <AppLayout>
+    <section class="flow-banner"><div><div class="flow-eyebrow">CONTROL THE FLOW</div><h2>全模型运营总览</h2><p>每一股流量，都通向下一次增长。</p></div><router-link to="/admin/accounts" class="btn btn-primary">管理渠道 ↗</router-link></section>
     <div class="space-y-6">
       <!-- Loading State -->
       <div v-if="loading" class="flex items-center justify-center py-12">

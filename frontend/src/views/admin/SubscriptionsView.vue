@@ -436,6 +436,14 @@
                 <span class="text-xs">{{ t('admin.subscriptions.resetQuota') }}</span>
               </button>
               <button
+                v-if="row.status === 'active' && String(row.group?.name || '').startsWith('Claude-ProNative-Seat-')"
+                @click="openVerify(row)"
+                class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400"
+              >
+                <Icon name="checkCircle" size="sm" />
+                <span class="text-xs">测试验证</span>
+              </button>
+              <button
                 v-if="row.status === 'active'"
                 @click="handleRevoke(row)"
                 class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
@@ -486,6 +494,48 @@
       @close="bulkAction = null"
       @completed="handleBulkCompleted"
     />
+
+    <!-- Seat verify -->
+    <BaseDialog :show="showVerifyDialog" title="测试验证：Claude 独享 Pro 席位" width="normal" @close="closeVerify">
+      <div class="space-y-4 text-sm">
+        <div v-if="verifySub" class="text-gray-600 dark:text-gray-300">
+          用户：{{ verifySub.user?.email || verifySub.user_id }}　席位：{{ verifySub.group?.name }}
+        </div>
+        <div v-if="!verifyResult && !verifying" class="space-y-3">
+          <label class="block">
+            <span class="mb-1 block text-gray-500">测试模型（价格从低到高）</span>
+            <select v-model="verifyModel" class="input w-full">
+              <option v-for="m in VERIFY_MODELS" :key="m.value" :value="m.value">{{ m.label }}</option>
+            </select>
+          </label>
+          <p class="rounded-lg bg-amber-50 p-3 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+            将用该客户自己的 Key 向网关发送一条极短请求（约几十 token），会在客户的使用记录里多出一条，并消耗少量独享账号额度。不会显示或导出 Key。
+          </p>
+        </div>
+        <div v-if="verifying" class="py-6 text-center text-gray-500">正在测试，最长约 1 分钟……</div>
+        <div v-if="verifyError" class="rounded-lg bg-red-50 p-3 text-red-700 dark:bg-red-900/20 dark:text-red-300">{{ verifyError }}</div>
+        <div v-if="verifyResult" class="space-y-3">
+          <div :class="verifyResult.ok ? 'text-emerald-600' : 'text-red-600'" class="text-base font-semibold">
+            {{ verifyResult.ok ? '全部通过：该客户可以正常使用' : '存在未通过项，请按提示处理' }}
+          </div>
+          <ul class="space-y-2">
+            <li v-for="c in verifyResult.checks" :key="c.key" class="flex gap-2">
+              <span :class="c.ok ? 'text-emerald-600' : 'text-red-600'" class="font-bold">{{ c.ok ? '通过' : '失败' }}</span>
+              <span><span class="font-medium">{{ c.label }}</span><span class="block text-gray-500 dark:text-gray-400">{{ c.detail }}</span></span>
+            </li>
+          </ul>
+          <div v-if="verifyResult.quota" class="rounded-lg bg-gray-50 p-3 text-gray-600 dark:bg-dark-700 dark:text-gray-300">
+            5 小时已用 {{ verifyResult.quota['5h']?.used ?? '-' }}%　每周已用 {{ verifyResult.quota.weekly?.used ?? '-' }}%
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <div class="flex justify-end gap-3">
+          <button class="btn btn-secondary" @click="closeVerify">关闭</button>
+          <button v-if="!verifying" class="btn btn-primary" @click="runVerify">{{ verifyResult || verifyError ? '重新测试' : '开始测试' }}</button>
+        </div>
+      </template>
+    </BaseDialog>
 
     <!-- Assign Subscription Modal -->
     <BaseDialog
@@ -1085,6 +1135,41 @@ const showAssignModal = ref(false)
 const showExtendModal = ref(false)
 const showRevokeDialog = ref(false)
 const showRestoreDialog = ref(false)
+const VERIFY_MODELS = [
+  { value: 'claude-haiku-4-5-20251001', label: 'Haiku 4.5（最便宜，默认）' },
+  { value: 'claude-sonnet-5-5', label: 'Sonnet 5.5' },
+  { value: 'claude-opus-5-5', label: 'Opus 5.5' }
+]
+const showVerifyDialog = ref(false)
+const verifySub = ref<UserSubscription | null>(null)
+const verifyModel = ref(VERIFY_MODELS[0].value)
+const verifying = ref(false)
+const verifyError = ref('')
+const verifyResult = ref<Awaited<ReturnType<typeof adminAPI.subscriptions.verifySeat>> | null>(null)
+const openVerify = (row: UserSubscription) => {
+  verifySub.value = row
+  verifyResult.value = null
+  verifyError.value = ''
+  verifyModel.value = VERIFY_MODELS[0].value
+  showVerifyDialog.value = true
+}
+const closeVerify = () => {
+  if (verifying.value) return
+  showVerifyDialog.value = false
+}
+const runVerify = async () => {
+  if (!verifySub.value) return
+  verifying.value = true
+  verifyError.value = ''
+  verifyResult.value = null
+  try {
+    verifyResult.value = await adminAPI.subscriptions.verifySeat(verifySub.value.id, verifyModel.value)
+  } catch (error: any) {
+    verifyError.value = error?.response?.data?.message || error?.message || '测试失败'
+  } finally {
+    verifying.value = false
+  }
+}
 const showResetQuotaConfirm = ref(false)
 const submitting = ref(false)
 const resettingSubscription = ref<UserSubscription | null>(null)

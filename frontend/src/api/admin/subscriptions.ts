@@ -229,7 +229,23 @@ export async function listByUser(
   return data
 }
 
+export interface SeatVerifyCheck { key: string; label: string; ok: boolean; detail: string }
+export interface SeatVerifyResult {
+  ok: boolean
+  model: string
+  group: string
+  checks: SeatVerifyCheck[]
+  quota: Record<string, { used: number; resets_at: string | null }> | null
+  verified_at: string
+}
+
+export async function verifySeat(id: number, model: string): Promise<SeatVerifyResult> {
+  const { data } = await apiClient.post<SeatVerifyResult>(`/admin/subscriptions/${id}/verify-seat`, { model }, { timeout: 90000 })
+  return data
+}
+
 export const subscriptionsAPI = {
+  verifySeat,
   list,
   getById,
   getProgress,

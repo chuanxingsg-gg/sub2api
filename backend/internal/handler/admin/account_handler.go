@@ -137,6 +137,7 @@ type CreateAccountRequest struct {
 	AutoPauseOnExpired      *bool          `json:"auto_pause_on_expired"`
 	ProbeEnabled            *bool          `json:"upstream_billing_probe_enabled"`
 	ConfirmMixedChannelRisk *bool          `json:"confirm_mixed_channel_risk"` // 用户确认混合渠道风险
+	AutoProNativeSeat       bool           `json:"auto_pronative_seat"`        // 自动创建 Claude-ProNative-Seat-N 并绑定
 }
 
 // UpdateAccountRequest represents update account request
@@ -1041,7 +1042,23 @@ func (h *AccountHandler) Create(c *gin.Context) {
 	// 幂等重放时闭包不会执行 → createdAccount 为 nil → 不重复调度。
 	var createdAccount *service.Account
 
+	if req.AutoProNativeSeat {
+		if err := validateAutoProNativeSeat(req.Platform, req.Type); err != nil {
+			response.ErrorFrom(c, err)
+			return
+		}
+	}
+
 	result, err := executeAdminIdempotent(c, "admin.accounts.create", req, service.DefaultWriteIdempotencyTTL(), func(ctx context.Context) (any, error) {
+		groupIDs := req.GroupIDs
+		var seat *service.Group
+		if req.AutoProNativeSeat {
+			var seatErr error
+			if seat, seatErr = h.createProNativeSeatGroup(ctx); seatErr != nil {
+				return nil, seatErr
+			}
+			groupIDs = append(append([]int64{}, req.GroupIDs...), seat.ID)
+		}
 		account, execErr := h.adminService.CreateAccount(ctx, &service.CreateAccountInput{
 			Name:                  req.Name,
 			Notes:                 req.Notes,
@@ -1054,13 +1071,16 @@ func (h *AccountHandler) Create(c *gin.Context) {
 			Priority:              req.Priority,
 			RateMultiplier:        req.RateMultiplier,
 			LoadFactor:            req.LoadFactor,
-			GroupIDs:              req.GroupIDs,
+			GroupIDs:              groupIDs,
 			ExpiresAt:             req.ExpiresAt,
 			AutoPauseOnExpired:    req.AutoPauseOnExpired,
 			ProbeEnabled:          req.ProbeEnabled,
 			SkipMixedChannelCheck: skipCheck,
 		})
 		if execErr != nil {
+			if seat != nil {
+				_ = h.adminService.DeleteGroupIfEmpty(ctx, seat.ID) // 账号没建成，回收空席位
+			}
 			return nil, execErr
 		}
 		createdAccount = account

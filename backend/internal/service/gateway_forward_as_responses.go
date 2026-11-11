@@ -146,7 +146,10 @@ func (s *GatewayService) ForwardAsResponses(
 	reasoningEffort = ApplyThinkingEnabledFallback(reasoningEffort, forwardedBody, mappedModel)
 
 	// 11. Send request
-	resp, err := s.httpUpstream.DoWithTLS(upstreamReq, proxyURL, account.ID, account.Concurrency, s.tlsFPProfileService.ResolveTLSProfile(account))
+	resp, err, cancelResponseRequest := s.doResponsesUpstreamWithKeepalive(c, clientStream, upstreamReq, func(req *http.Request) (*http.Response, error) {
+		return s.httpUpstream.DoWithTLS(req, proxyURL, account.ID, account.Concurrency, s.tlsFPProfileService.ResolveTLSProfile(account))
+	})
+	defer cancelResponseRequest()
 	if err != nil {
 		if resp != nil && resp.Body != nil {
 			_ = resp.Body.Close()
@@ -552,6 +555,39 @@ func (s *GatewayService) handleResponsesStreamingResponse(
 		maxLineSize = s.cfg.Gateway.MaxLineSize
 	}
 	scanner.Buffer(make([]byte, 0, 64*1024), maxLineSize)
+	interval := time.Duration(0)
+	if s.cfg != nil {
+		interval = time.Duration(s.cfg.Gateway.StreamDataIntervalTimeout) * time.Second
+	}
+	pump := newAnthropicNativeLinePump(scanner, interval)
+	defer pump.stop()
+	defer resp.Body.Close()
+	ticker, ticks := responsesKeepaliveTicker(s.responsesKeepaliveInterval())
+	if ticker != nil {
+		defer ticker.Stop()
+	}
+	nextLine := func() (string, error) {
+		for {
+			var idle <-chan time.Time
+			if pump.timer != nil {
+				idle = pump.timer.C
+			}
+			select {
+			case ev, ok := <-pump.events:
+				if !ok {
+					return "", io.EOF
+				}
+				pump.resetTimer()
+				return ev.line, ev.err
+			case <-idle:
+				return "", errAnthropicNativeStreamIdle
+			case <-ticks:
+				if err := writeResponsesKeepalive(c); err != nil {
+					return "", err
+				}
+			}
+		}
+	}
 
 	resultWithUsage := func() *ForwardResult {
 		return &ForwardResult{
@@ -642,18 +678,24 @@ func (s *GatewayService) handleResponsesStreamingResponse(
 	}
 
 	// Read Anthropic SSE events
-	for scanner.Scan() {
-		line := scanner.Text()
+	var readErr error
+	for {
+		line, err := nextLine()
+		if err != nil {
+			readErr = err
+			break
+		}
 		eventType, ok := parseAnthropicSSEField(line, "event")
 		if !ok {
 			continue
 		}
 
 		// Read data line
-		if !scanner.Scan() {
+		dataLine, err := nextLine()
+		if err != nil {
+			readErr = err
 			break
 		}
-		dataLine := scanner.Text()
 		payload, ok := parseAnthropicSSEField(dataLine, "data")
 		if !ok {
 			continue
@@ -674,7 +716,7 @@ func (s *GatewayService) handleResponsesStreamingResponse(
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
+	if err := readErr; err != nil && !errors.Is(err, io.EOF) {
 		if !errors.Is(err, context.Canceled) && !errors.Is(err, context.DeadlineExceeded) {
 			logger.L().Warn("forward_as_responses stream: read error",
 				zap.Error(err),
@@ -683,6 +725,14 @@ func (s *GatewayService) handleResponsesStreamingResponse(
 		}
 	}
 
+	if readErr != nil && !errors.Is(readErr, io.EOF) {
+		writeResponsesError(c, http.StatusBadGateway, "upstream_error", "Upstream response interrupted")
+		return resultWithUsage(), readErr
+	}
+	if !state.CompletedSent && state.StopReason == "" {
+		writeResponsesError(c, http.StatusBadGateway, "upstream_error", "Upstream stream ended before completion")
+		return resultWithUsage(), fmt.Errorf("upstream stream ended before completion")
+	}
 	return finalizeStream()
 }
 
@@ -702,6 +752,12 @@ func appendRawJSON(existing json.RawMessage, fragment string) json.RawMessage {
 // writeResponsesError writes an error response in OpenAI Responses API format.
 func writeResponsesError(c *gin.Context, statusCode int, code, message string) {
 	MarkResponseCommitted(c)
+	if c.Writer.Written() && strings.HasPrefix(c.Writer.Header().Get("Content-Type"), "text/event-stream") {
+		payload, _ := json.Marshal(gin.H{"type": "error", "error": gin.H{"type": code, "code": code, "message": message}})
+		fmt.Fprintf(c.Writer, "event: error\ndata: %s\n\n", payload)
+		c.Writer.Flush()
+		return
+	}
 	c.JSON(statusCode, gin.H{
 		"error": gin.H{
 			"code":    code,

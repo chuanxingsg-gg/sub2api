@@ -1106,6 +1106,8 @@ export default {
       higherPriorityFirst: 'Lower value means higher priority',
       mixedScheduling: 'Use in /v1/messages',
       mixedSchedulingHint: 'Enable to participate in Anthropic/Gemini group scheduling',
+      autoProNativeSeat: 'Create an exclusive seat group and bind it (Claude-ProNative-Seat-N)',
+      autoProNativeSeatHint: 'On save, the next numbered seat group is created with the existing seat settings and this account is bound to it.',
       mixedSchedulingTooltip:
         '!! WARNING !! Antigravity Claude and Anthropic Claude cannot be used in the same context. If you have both Anthropic and Antigravity accounts, enabling this option will cause frequent 400 errors. When enabled, please use the group feature to isolate Antigravity accounts from Anthropic accounts. Make sure you understand this before enabling!!',
       aiCreditsBalance: 'AI Credits',

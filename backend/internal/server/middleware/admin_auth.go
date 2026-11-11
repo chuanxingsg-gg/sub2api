@@ -165,6 +165,10 @@ func validateJWTForAdmin(
 	// 验证 JWT token
 	claims, err := authService.ValidateToken(token)
 	if err != nil {
+		if errors.Is(err, service.ErrServiceUnavailable) {
+			AbortWithError(c, 503, "AUTH_UNAVAILABLE", "Authentication service temporarily unavailable")
+			return false
+		}
 		if errors.Is(err, service.ErrTokenExpired) {
 			AbortWithError(c, 401, "TOKEN_EXPIRED", "Token has expired")
 			return false

@@ -1208,6 +1208,8 @@ export default {
       higherPriorityFirst: '数值越小优先级越高',
       mixedScheduling: '在 /v1/messages 中使用',
       mixedSchedulingHint: '启用后可参与 Anthropic/Gemini 分组的调度',
+      autoProNativeSeat: '创建独享席位分组并绑定（Claude-ProNative-Seat-N）',
+      autoProNativeSeatHint: '勾选后保存账号时自动新建下一个编号的席位分组，参数沿用现有席位，并把此账号绑定进去，无需手动建分组。',
       mixedSchedulingTooltip:
         '！！注意！！ Antigravity Claude 和 Anthropic Claude 无法在同个上下文中使用，如果你同时有 Anthropic 账号和 Antigravity 账号，开启此选项会导致经常 400 报错。开启后，请用分组功能做好 Antigravity 账号和 Anthropic 账号的隔离。一定要弄明白再开启！！',
       aiCreditsBalance: 'AI Credits',

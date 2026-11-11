@@ -96,6 +96,9 @@ export const useAuthStore = defineStore('auth', () => {
     return user.value?.role === 'admin'
   })
 
+  const isOperator = computed(() => user.value?.role === 'operator')
+  const operationsHome = computed(() => isOperator.value ? '/operations' : isAdmin.value ? '/admin/dashboard' : '/dashboard')
+
   const isSimpleMode = computed(() => runMode.value === 'simple')
   const hasPendingAuthSession = computed(() => pendingAuthSession.value !== null)
 
@@ -414,16 +417,8 @@ export const useAuthStore = defineStore('auth', () => {
    * Clears all authentication state and persisted data
    */
   async function logout(): Promise<void> {
-    try {
-      // Call API logout (revokes refresh token on server)
-      await authAPI.logout()
-    } catch (err) {
-      // 服务端吊销失败（网络/5xx/超时）不应阻止本地登出，否则用户点了退出仍处于登录态。
-      console.warn('Logout API call failed, clearing local session anyway', err)
-    } finally {
-      // Always clear local state (tokens, user data, refresh timers)
-      clearAuth()
-    }
+    await authAPI.logout()
+    clearAuth()
   }
 
   /**
@@ -498,6 +493,8 @@ export const useAuthStore = defineStore('auth', () => {
     // Computed
     isAuthenticated,
     isAdmin,
+    isOperator,
+    operationsHome,
     isSimpleMode,
     hasPendingAuthSession,
 

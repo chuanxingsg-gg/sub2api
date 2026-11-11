@@ -129,6 +129,13 @@ func SecurityHeaders(cfg config.CSPConfig, getFrameSrcOrigins func() []string) g
 
 		c.Header("X-Content-Type-Options", "nosniff")
 		c.Header("X-Frame-Options", "DENY")
+		// The inert homepage editor preview contains no account actions. Only this
+		// document can be framed, and only by the same-origin admin console.
+		if c.Request.URL.Path == "/hero-preview/preview.html" {
+			finalPolicy = strings.ReplaceAll(finalPolicy, "frame-ancestors 'none'", "frame-ancestors 'self'")
+			c.Header("X-Frame-Options", "SAMEORIGIN")
+		}
+
 		c.Header("Referrer-Policy", "strict-origin-when-cross-origin")
 		if isAPIRoutePath(c) {
 			c.Next()

@@ -841,11 +841,11 @@ export default {
     currentPassword: '当前密码',
     newPassword: '新密码',
     confirmNewPassword: '确认新密码',
-    passwordHint: '密码至少需要 8 个字符',
+    passwordHint: '新密码至少需要 15 个字符，且不超过 72 字节',
     changingPassword: '修改中...',
     changePasswordButton: '修改密码',
     passwordsNotMatch: '两次输入的密码不一致',
-    passwordTooShort: '密码至少需要 8 个字符',
+    passwordTooShort: '新密码至少需要 15 个字符，且不超过 72 字节',
     passwordChangeSuccess: '密码修改成功',
     passwordChangeFailed: '密码修改失败',
     // TOTP 2FA

@@ -84,7 +84,7 @@ export interface User {
   linuxdo_bound?: boolean
   oidc_bound?: boolean
   wechat_bound?: boolean
-  role: 'admin' | 'user' // User role for authorization
+  role: 'admin' | 'operator' | 'user' // User role for authorization
   balance: number // User balance for API usage
   frozen_balance?: number // Balance currently held by async batch jobs
   concurrency: number // Allowed concurrent requests
@@ -192,7 +192,7 @@ export interface CustomMenuItem {
   url: string
   page_slug?: string
   hide_open_button?: boolean
-  visibility: 'user' | 'admin'
+  visibility: 'user' | 'operator' | 'admin'
   sort_order: number
 }
 
@@ -1564,6 +1564,7 @@ export interface CreateAccountRequest {
   auto_pause_on_expired?: boolean
   upstream_billing_probe_enabled?: boolean
   confirm_mixed_channel_risk?: boolean
+  auto_pronative_seat?: boolean // 自动创建 Claude-ProNative-Seat-N 并绑定（仅 Claude OAuth/Setup Token）
 }
 
 export interface UpdateAccountRequest {
@@ -2105,7 +2106,7 @@ export interface UpdateUserRequest {
   password?: string
   username?: string
   notes?: string
-  role?: 'admin' | 'user'
+  role?: 'admin' | 'operator' | 'user'
   balance?: number
   concurrency?: number
   rpm_limit?: number

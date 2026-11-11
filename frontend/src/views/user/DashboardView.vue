@@ -1,5 +1,6 @@
 <template>
   <AppLayout>
+    <section class="flow-banner"><div><div class="flow-eyebrow">YOUR AI WORKSPACE</div><h2>让今天的灵感，即刻出发。</h2><p>模型、用量与余额，一目了然。</p></div><router-link to="/keys" class="btn btn-primary">管理 API Key ↗</router-link></section>
     <div class="space-y-6">
       <div v-if="loading" class="flex items-center justify-center py-12"><LoadingSpinner /></div>
       <template v-else-if="stats">

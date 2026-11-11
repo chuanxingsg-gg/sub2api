@@ -3748,6 +3748,18 @@
           </div>
         </div>
 
+        <!-- 独享 Pro：自动创建席位分组并绑定 -->
+        <label
+          v-if="form.platform === 'anthropic' && (form.type === 'oauth' || form.type === 'setup-token')"
+          class="flex cursor-pointer items-start gap-2 rounded-lg border border-gray-200 p-3 dark:border-dark-600"
+        >
+          <input v-model="autoProNativeSeat" type="checkbox" class="mt-1 h-4 w-4 rounded border-gray-300" />
+          <span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('admin.accounts.autoProNativeSeat') }}</span>
+            <span class="block text-xs text-gray-500 dark:text-gray-400">{{ t('admin.accounts.autoProNativeSeatHint') }}</span>
+          </span>
+        </label>
+
         <!-- Group Selection - 仅标准模式显示 -->
         <GroupSelector
           v-model="form.group_ids"
@@ -4215,6 +4227,7 @@ import {
   type OpenAIWSMode
 } from '@/utils/openaiWsMode'
 import OAuthAuthorizationFlow from './OAuthAuthorizationFlow.vue'
+import { autoProNativeSeat } from '@/composables/useAutoProNativeSeat'
 
 // Type for exposed OAuthAuthorizationFlow component
 // Note: defineExpose automatically unwraps refs, so we use the unwrapped types

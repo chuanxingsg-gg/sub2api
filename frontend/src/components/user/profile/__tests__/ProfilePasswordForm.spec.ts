@@ -51,7 +51,7 @@ describe('ProfilePasswordForm', () => {
     const wrapper = mount(ProfilePasswordForm)
 
     await wrapper.get('#old_password').setValue('old-password')
-    await wrapper.get('#new_password').setValue('new-password')
+    await wrapper.get('#new_password').setValue('new-long-password-29')
     await wrapper.get('#confirm_password').setValue('different-password')
     await wrapper.get('form').trigger('submit.prevent')
 
@@ -70,11 +70,11 @@ describe('ProfilePasswordForm', () => {
     const wrapper = mount(ProfilePasswordForm)
 
     await wrapper.get('#old_password').setValue('old-password')
-    await wrapper.get('#new_password').setValue('new-password')
-    await wrapper.get('#confirm_password').setValue('new-password')
+    await wrapper.get('#new_password').setValue('new-long-password-29')
+    await wrapper.get('#confirm_password').setValue('new-long-password-29')
     await wrapper.get('form').trigger('submit.prevent')
 
-    expect(changePasswordMock).toHaveBeenCalledWith('old-password', 'new-password')
+    expect(changePasswordMock).toHaveBeenCalledWith('old-password', 'new-long-password-29')
     expect(showErrorMock).toHaveBeenLastCalledWith(expectedMessage)
     expect(wrapper.find('.input-error-text').exists()).toBe(false)
   })
